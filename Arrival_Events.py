@@ -84,7 +84,6 @@ try:
                                num_sources,
                                num_events)
 except ValueError as e:
-    # e.message
     st.error(getattr(e, 'message', repr(e)))
     E,T = None, None
 
@@ -96,6 +95,8 @@ if E:
                         step=1,
                         value=(t_beg, t_end))
 
+    st.write(f"{t_range}\n")
+
     data = []
     for i in range(num_sources + 1):
         if i == 0:
@@ -103,20 +104,20 @@ if E:
         else:
             d = dict(t=[e[0] for e in E if e[1]==src[i-1]], e=["A" for e in E if e[1]==src[i-1]])
         data.append(pd.DataFrame(d))
-        idx = (data[-1].t >= t_beg) & (data[-1].t <= t_end)
+        idx = (data[-1].t >= t_range[0]) & (data[-1].t <= t_range[1])
         data[-1] = data[-1].loc[idx]
 
     chart_e = []
     chart_e.append(alt.Chart(data[0])
                       .mark_point()
                       .encode(x=alt.X("t:Q", 
-                                    scale=alt.Scale(domain=[t_beg,t_end])),
+                                    scale=alt.Scale(domain=t_range)),
                               y=alt.X("e:N")))
     for i in range(num_sources+1):
         chart_e.append(alt.Chart(data[i])
                           .mark_point()
                           .encode(x=alt.X("t:Q", 
-                                          scale=alt.Scale(domain=[t_beg,t_end])),
+                                          scale=alt.Scale(domain=t_range)),
                                   y=alt.X("e:N")))
 
     idx = (data[0].t >= t_beg) & (data[0].t <= t_end)
@@ -135,6 +136,7 @@ if E:
         st.altair_chart(chart_h,
                         use_container_width=True)
 
+    # how to dump data on screen:
     # st.dataframe(data[0])
     # st.write(dict(t=[e[0] for e in E if e[1]==src[-1]], e=["A" for e in E if e[1]==src[-1]]))
 
